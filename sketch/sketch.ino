@@ -1,4 +1,16 @@
+
+//SERVO MOTOR
+#include <Servo.h>
+#define SERVO 11 // Porta Digital 6 PWM
+ Servo s; // Variável Servo
+int pos; // Posição Servo
+//SERVO MOTOR
+#define PORTB _SFR_IO8(0x05)
+
+
+
 #define qtdLED 6  //Declaração da quantidade de LEDs da aplicação
+
 int LEDs[qtdLED]; //Variável que guardará em cada posição o pino de saída para cada LED 
 int sensorPin=0; //Variável para guardar o valor lido pelo sensor
 int tempo; //Variável para o tempo de leitura do sensor
@@ -6,8 +18,9 @@ int lidomaximo; //Variável para armazenar o maior valor lido durante a leitura
 int i; //Variável de contagem
 int j; //Variável de contagem
 
+
 // TESTE COM BOTÃO
-  //const int não mudam
+//const int não mudam
 const int buttonPin = 12;     // Pin onde o botão está inserido
 const int ledPin =  11;      // Pin do led acendido pelo botão
 int btnStatus = 0;         // ler o Variável para guardar o estado do botao, pressionado ou não
@@ -38,6 +51,12 @@ for(i=0;i<qtdLED;i++) //Define os pinos dos LEDs(nesse exemplo de 2 ao 7) como s
   pinMode(ledPin, OUTPUT);    //Led recebe energia
   pinMode(buttonPin, INPUT);  //Botão envia dados
   // TESTE COM BOTÃO
+
+  // DEFINIR SERVO MOTOR
+    s.attach(SERVO);
+    pos=0;
+    s.write(pos);
+  // DEFINIR SERVO MOTOR
 
 }
 
@@ -89,19 +108,46 @@ void loop()
     // FIM DA CONTAGEM
 
       // LIBERA OU NÃO A TRAVA DO CARRO
-     if (5>nivel){  // LIBERA
-        Serial.print("passou");
+
+     if(nivel<1){
+
+        Serial.print(nivel);
+        
+        for(pos = 0; pos < 90; pos++)
+        {
+          s.write(pos);
+          delay(5);
+        }
+        
+     }
+     else{
+       
+        Serial.print(nivel);
+        
+        for(pos = 90; pos >= 0; pos--)
+        {
+          s.write(pos);
+          delay(5);
+        }
+
+     }
+
+      
+     if (nivel<5){  // 15 minutos de espera
+        Serial.print("15 minutos");
         Serial.print("(");
         Serial.print(lidomaximo);
         Serial.print(")");
         Serial.println();
+        
       }
-      else{         // NÃO LIBERA
-        Serial.print("não passou!");
+      else{         // 30 minutos de espera
+        Serial.print("30 minutos");
         Serial.print("(");
         Serial.print(lidomaximo);
         Serial.print(")");
         Serial.println();
+        
       }
 
 
