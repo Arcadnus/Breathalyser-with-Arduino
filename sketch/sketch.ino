@@ -1,72 +1,85 @@
-const int analogPin = A0;   
-const int ledCount = 10;    
-int ledPins[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};   
+#define qtdLED 6  //Declaração da quantidade de LEDs da aplicação
+int LEDs[qtdLED]; //Vetor que guardará em cada posição o pino de saída para cada LED 
+int sensorPin=0; //Variável para guardar o valor lido pelo sensor
+int tempo; //Variável para o tempo de leitura do sensor
+int lidomaximo; //Variável para armazenar o maior valor lido durante a leitura
+int i; //Variável de contagem
+int j; //Variável de contagem
 
-void setup() {
-  
+void setup()
+{
   Serial.begin(9600);
-  for (int thisLed = 0; thisLed < ledCount; thisLed++) {
-    pinMode(ledPins[thisLed], OUTPUT); 
+  i=0;
+  j=2;
+
+  while(i < qtdLED) //Enquanto i for menor que a quantidade de LEDs que foi definida...
+  {                 //...guarda no vetor um valor(começando de 2 e incrementando) equivalente a um pino digital
+    LEDs[i] = j;
+    i++;
+    j++;
   }
+
+for(i=0;i<qtdLED;i++) //Define os pinos dos LEDs(nesse exemplo de 2 ao 7) como saída
+  {
+    pinMode(LEDs[i], OUTPUT);
+  }
+  pinMode(13, OUTPUT); //Define o pino 13 como saída para nos indicar quando pode fazer-se o teste (LED Piscando)...
+                       //...e quando o circuito estiver fazendo a leitura do sensor (LED Aceso)
 }
 
-void loop() {
+void loop()
+{
+  PORTB = PORTB ^ 100000;  //Inverte o estado do pino digital 13 para dar o efeito de Blink(Piscagem)
+  delay(100); //Delay para efeito de blink do LED, indicado que o teste pode ser feito pelo usuário
+  int sensor = analogRead(sensorPin); //Lê o sensor e guarda na variável
 
-  int sensorReading = analogRead(analogPin);
-  int ledLevel = map(sensorReading, 0, 1023, 0, ledCount);
-    if ( 0 < ledLevel)
-      {digitalWrite(ledPins[1], HIGH);} 
-    else
-      {digitalWrite(ledPins[1], LOW);}
-    
-    if ( 1 < ledLevel)
-      {digitalWrite(ledPins[2], HIGH);} 
-    else
-      {digitalWrite(ledPins[2], LOW);}
 
-    if ( 2 < ledLevel)
-      {digitalWrite(ledPins[3], HIGH);} 
-    else
-      {digitalWrite(ledPins[3], LOW);}
-
-    if ( 3 < ledLevel)
-      {digitalWrite(ledPins[4], HIGH);} 
-    else
-      {digitalWrite(ledPins[4], LOW);}
-
-    if ( 4 < ledLevel)
-      {digitalWrite(ledPins[5], HIGH);} 
-    else
-      {digitalWrite(ledPins[5], LOW);}
-
-    if ( 5 < ledLevel)
-      {digitalWrite(ledPins[6], HIGH);} 
-    else
-      {digitalWrite(ledPins[6], LOW);}
-
-    if ( 6 < ledLevel)
-      {digitalWrite(ledPins[7], HIGH);} 
-    else
-      {digitalWrite(ledPins[7], LOW);}
-
-    if ( 7 < ledLevel)
-      {digitalWrite(ledPins[8], HIGH);} 
-    else
-      {digitalWrite(ledPins[8], LOW);}
-
-    if ( 8 < ledLevel)
-      {digitalWrite(ledPins[9], HIGH);} 
-    else
-      {digitalWrite(ledPins[9], LOW);}
-
-    if ( 9 < ledLevel)
-      {digitalWrite(ledPins[10], HIGH);} 
-    else
-      {digitalWrite(ledPins[10], LOW);}
-
+  
+  if(sensor >= 40) //Se a leitura for maior que 40 (valor escolhido para a demonstração utilizando-se um...
+  {                //...antisséptico bucal)
+    digitalWrite(13, HIGH); //Acende o LED Azul(Indicando que o sensor detectou um mínimo de álcool (sensor >= 40)
+    lidomaximo = 0;         //Iniciar o valor máximo lido pelo sensor como 0
+    for(tempo=0;tempo<=5000;tempo++) //Faz a leitura do sensor por 5 segundos... 
+    {                                //...a cada 1 milissegundo atualiza o maior valor lido pelo sensor.
+      int sensor = analogRead(sensorPin);
+      delay(1);
+      if(sensor > lidomaximo)
+      {
+        lidomaximo = sensor;
+      }
+    }
+    digitalWrite(13, LOW); //Após o termino da leitura, apaga o LED Azul
+    int nivel = map(lidomaximo, 0, 1023, 0, qtdLED); //Converte a escala de 0 a 200 do sensor em...
+                                                    //...0 a 6(LEDs) e armazena na variável nível.
+                                                    //OBS: Lembrando o que o sensor lê de 0 a 1023, pelo antisséptico...
+                                                    //...ter um teor de álcool relativamente baixo, foi utilizado...
+                                                    //...a escala de 0 a 200
+    for(i=0;i<qtdLED;i++) //Compara todos os pinos dos LEDs com o valor convertido da escala...
+    {                     //...Ex: Se meu nível convertido foi 5, então o os leds dos pinos 2 ao 6 irão acender
+      if (i < nivel) //Compara o pino atual da contagem, e se for menor que o nível máximo convertido...
+      {
+        digitalWrite(LEDs[i], HIGH); //...Acende o LED
+      }
+      else //Compara o pino atual da contagem, e se for maior que o nível máximo convertido ...
+      {
+        digitalWrite(LEDs[i], LOW); //...Apaga o LED
+      }
  
-
+      
+    }
+   if (5>nivel){
+      Serial.print("passou");
+      Serial.println();
+    }
+    else{
+      Serial.print("não passou!");
+      Serial.println();
+    }
     
-    Serial.print(ledLevel);
-    delay(10);
+    delay(10000); //Aguarda 10 segundos para o usuário conseguir fazer a leitura do bargraph
+    for(i=0;i<qtdLED;i++) //Apaga todos os LEDs
+    {
+      digitalWrite(LEDs[i],LOW);
+    }
   }
+}
