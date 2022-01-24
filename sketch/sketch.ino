@@ -1,10 +1,18 @@
 #define qtdLED 6  //Declaração da quantidade de LEDs da aplicação
-int LEDs[qtdLED]; //Vetor que guardará em cada posição o pino de saída para cada LED 
+int LEDs[qtdLED]; //Variável que guardará em cada posição o pino de saída para cada LED 
 int sensorPin=0; //Variável para guardar o valor lido pelo sensor
 int tempo; //Variável para o tempo de leitura do sensor
 int lidomaximo; //Variável para armazenar o maior valor lido durante a leitura
 int i; //Variável de contagem
 int j; //Variável de contagem
+
+// TESTE COM BOTÃO
+  //const int não mudam
+const int buttonPin = 12;     // Pin onde o botão está inserido
+const int ledPin =  11;      // Pin do led acendido pelo botão
+int btnStatus = 0;         // ler o Variável para guardar o estado do botao, pressionado ou não
+//  TESTE COM BOTÃO
+
 
 void setup()
 {
@@ -25,6 +33,12 @@ for(i=0;i<qtdLED;i++) //Define os pinos dos LEDs(nesse exemplo de 2 ao 7) como s
   }
   pinMode(13, OUTPUT); //Define o pino 13 como saída para nos indicar quando pode fazer-se o teste (LED Piscando)...
                        //...e quando o circuito estiver fazendo a leitura do sensor (LED Aceso)
+
+  // TESTE COM BOTÃO
+  pinMode(ledPin, OUTPUT);    //Led recebe energia
+  pinMode(buttonPin, INPUT);  //Botão envia dados
+  // TESTE COM BOTÃO
+
 }
 
 void loop()
@@ -33,9 +47,12 @@ void loop()
   delay(100); //Delay para efeito de blink do LED, indicado que o teste pode ser feito pelo usuário
   int sensor = analogRead(sensorPin); //Lê o sensor e guarda na variável
 
+  btnStatus = digitalRead(buttonPin); //Lê o status do botão
 
-  
-  if(sensor >= 40) //Se a leitura for maior que 40 (valor escolhido para a demonstração utilizando-se um...
+  // COMEÇO DA CONTAGEM
+
+
+  if(btnStatus == LOW) //Se a leitura for maior que 40 (valor escolhido para a demonstração utilizando-se um...
   {                //...antisséptico bucal)
     digitalWrite(13, HIGH); //Acende o LED Azul(Indicando que o sensor detectou um mínimo de álcool (sensor >= 40)
     lidomaximo = 0;         //Iniciar o valor máximo lido pelo sensor como 0
@@ -48,6 +65,7 @@ void loop()
         lidomaximo = sensor;
       }
     }
+
     digitalWrite(13, LOW); //Após o termino da leitura, apaga o LED Azul
     int nivel = map(lidomaximo, 0, 1023, 0, qtdLED); //Converte a escala de 0 a 200 do sensor em...
                                                     //...0 a 6(LEDs) e armazena na variável nível.
@@ -65,21 +83,38 @@ void loop()
         digitalWrite(LEDs[i], LOW); //...Apaga o LED
       }
  
-      
     }
-   if (5>nivel){
-      Serial.print("passou");
-      Serial.println();
-    }
-    else{
-      Serial.print("não passou!");
-      Serial.println();
-    }
+
+
+    // FIM DA CONTAGEM
+
+      // LIBERA OU NÃO A TRAVA DO CARRO
+     if (5>nivel){  // LIBERA
+        Serial.print("passou");
+        Serial.print("(");
+        Serial.print(lidomaximo);
+        Serial.print(")");
+        Serial.println();
+      }
+      else{         // NÃO LIBERA
+        Serial.print("não passou!");
+        Serial.print("(");
+        Serial.print(lidomaximo);
+        Serial.print(")");
+        Serial.println();
+      }
+
+
+
     
     delay(10000); //Aguarda 10 segundos para o usuário conseguir fazer a leitura do bargraph
     for(i=0;i<qtdLED;i++) //Apaga todos os LEDs
     {
       digitalWrite(LEDs[i],LOW);
     }
+
   }
+
+
+
 }
